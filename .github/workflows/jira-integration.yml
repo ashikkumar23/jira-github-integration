@@ -1,0 +1,29 @@
+name: Create Jira Issue on Label
+
+on:
+  issues:
+    types:
+      - labeled
+
+jobs:
+  create-jira-issue:
+    if: contains(github.event.label.name, 'bug') # Trigger only when the 'bug' label is added
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Jira Issue
+        uses: atlassian/gajira-create@v3.1.0
+        with:
+          jira-base-url: ${{ secrets.JIRA_BASE_URL }}
+          jira-user-email: ${{ secrets.JIRA_USER_EMAIL }}
+          jira-api-token: ${{ secrets.JIRA_TOKEN }}
+          project-key: JGI
+          summary: "Bug: ${{ github.event.issue.title }}"
+          description: |
+            Reporter: ${{ github.actor }}
+            
+            Issue URL: ${{ github.event.issue.html_url }}
+            
+            Description:
+            ${{ github.event.issue.body }}
+          issue-type: Bug
+          assignee: ${{ github.actor }}
