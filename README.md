@@ -12,13 +12,14 @@ This repository demonstrates a **Proof of Concept (POC)** for integrating Jira w
 
 ---
 
-## 📂 Project Structure
+## 📁 Project Structure
 ```
 jira-github-integration/
 ├── .github/
 │   └── workflows/
-│       └── jira-integration.yml  # GitHub Actions workflow file
-└── README.md                     # Project documentation
+│       └── jira-integration.yml   # GitHub Actions workflow file
+├── LICENSE                        # MIT License file
+└── README.md                      # This documentation
 ```
 
 ---
@@ -31,11 +32,11 @@ Before you begin, ensure you have the following:
 4. **GitHub Secrets**:
    - `JIRA_BASE_URL`: Your Jira instance URL (e.g., `https://your-domain.atlassian.net`).
    - `JIRA_USER_EMAIL`: The email address associated with your Jira account.
-   - `JIRA_TOKEN`: Your Jira API token.
+   - `JIRA_API_TOKEN`: Your Jira API token.
 
 ---
 
-## 🔧 Setup Instructions
+## ⚙️ Setup Instructions
 
 ### 1. Clone the Repository
 ```bash
@@ -47,7 +48,7 @@ cd jira-github-integration
 Go to your repository's **Settings** > **Secrets and variables** > **Actions**, and add the following secrets:
 - `JIRA_BASE_URL`
 - `JIRA_USER_EMAIL`
-- `JIRA_TOKEN`
+- `JIRA_API_TOKEN`
 
 ### 3. Update the Workflow File
 The workflow file is located at `.github/workflows/jira-integration.yml`. Ensure the following is set:
@@ -63,8 +64,9 @@ The workflow file is located at `.github/workflows/jira-integration.yml`. Ensure
 
 ## 🚀 How It Works
 1. When you add the `bug` label to a GitHub issue, the workflow is triggered.
-2. The workflow uses the [Atlassian Jira GitHub Action](https://github.com/marketplace/actions/jira-create-issue) to create a bug ticket in Jira.
-3. The issue details (title, description, reporter, and URL) are mapped to the Jira ticket.
+2. The workflow uses the [Atlassian Jira Login Action](https://github.com/atlassian/gajira-login) to login to Jira.
+3. The workflow uses the [Atlassian Jira Create Action](https://github.com/atlassian/gajira-create) to create a bug ticket in Jira.
+4. The issue details (title, description, reporter, and URL) are mapped to the Jira ticket.
 
 ---
 
@@ -85,23 +87,25 @@ jobs:
     if: contains(github.event.label.name, 'bug') # Trigger only when the 'bug' label is added
     runs-on: ubuntu-latest
     steps:
+      - name: Login to Jira
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }} # The base URL of your Jira instance
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }} # The email associated with your Jira user
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }} # The API token for Jira
+
       - name: Create Jira Issue
-        uses: atlassian/gajira-create@v3.1.0
+        uses: atlassian/gajira-create@v3
         with:
-          jira-base-url: ${{ secrets.JIRA_BASE_URL }}
-          jira-user-email: ${{ secrets.JIRA_USER_EMAIL }}
-          jira-api-token: ${{ secrets.JIRA_TOKEN }}
-          project-key: JGI
-          summary: "Bug: ${{ github.event.issue.title }}"
+          project: JGI # The Jira project key where the issue should be created
+          issuetype: Bug # The type of issue to create
+          summary: ${{ github.event.issue.title }} # The title of the issue from GitHub
           description: |
-            Reporter: ${{ github.actor }}
+            **Reporter:** ${{ github.actor }}
             
-            Issue URL: ${{ github.event.issue.html_url }}
+            **Issue URL:** ${{ github.event.issue.html_url }}
             
-            Description:
-            ${{ github.event.issue.body }}
-          issue-type: Bug
-          assignee: ${{ github.actor }}
+            **Description:** ${{ github.event.issue.body }}
 ```
 
 ---
@@ -115,7 +119,8 @@ jobs:
 ## 📖 References
 - [Jira API Documentation](https://developer.atlassian.com/cloud/jira/platform/rest/v3/)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Atlassian Jira GitHub Action](https://github.com/marketplace/actions/jira-create-issue)
+- [Atlassian Jira Login Action](https://github.com/atlassian/gajira-login)
+- [Atlassian Jira Create Action](https://github.com/atlassian/gajira-create)
 
 ---
 
