@@ -38,24 +38,24 @@ Before you begin, ensure you have the following:
 
 ## ⚙️ Setup Instructions
 
-### 1. Clone the Repository
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/ashikkumar23/jira-github-integration.git
 cd jira-github-integration
 ```
 
-### 2. Configure Secrets
+#### 2. Configure Secrets
 Go to your repository's **Settings** > **Secrets and variables** > **Actions**, and add the following secrets:
 - `JIRA_BASE_URL`
 - `JIRA_USER_EMAIL`
 - `JIRA_API_TOKEN`
 
-### 3. Update the Workflow File
+#### 3. Update the Workflow File
 The workflow file is located at `.github/workflows/jira-integration.yml`. Ensure the following is set:
 - Replace `JGI` with your Jira project key.
 - Adjust other parameters if needed.
 
-### 4. Test the Workflow
+#### 4. Test the Workflow
 - Create a new issue in the repository.
 - Add the `bug` label to the issue.
 - Check your Jira project for a new bug ticket.
@@ -67,46 +67,6 @@ The workflow file is located at `.github/workflows/jira-integration.yml`. Ensure
 2. The workflow uses the [Atlassian Jira Login Action](https://github.com/atlassian/gajira-login) to login to Jira.
 3. The workflow uses the [Atlassian Jira Create Action](https://github.com/atlassian/gajira-create) to create a bug ticket in Jira.
 4. The issue details (title, description, reporter, and URL) are mapped to the Jira ticket.
-
----
-
-## 📝 Example Workflow File
-
-The following is the GitHub Actions workflow file used in this project:
-
-```yaml name=.github/workflows/jira-integration.yml
-name: Create Jira Issue on Label
-
-on:
-  issues:
-    types:
-      - labeled
-
-jobs:
-  create-jira-issue:
-    if: contains(github.event.label.name, 'bug') # Trigger only when the 'bug' label is added
-    runs-on: ubuntu-latest
-    steps:
-      - name: Login to Jira
-        uses: atlassian/gajira-login@v3
-        env:
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }} # The base URL of your Jira instance
-          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }} # The email associated with your Jira user
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }} # The API token for Jira
-
-      - name: Create Jira Issue
-        uses: atlassian/gajira-create@v3
-        with:
-          project: JGI # The Jira project key where the issue should be created
-          issuetype: Bug # The type of issue to create
-          summary: ${{ github.event.issue.title }} # The title of the issue from GitHub
-          description: |
-            **Reporter:** ${{ github.actor }}
-            
-            **Issue URL:** ${{ github.event.issue.html_url }}
-            
-            **Description:** ${{ github.event.issue.body }}
-```
 
 ---
 
